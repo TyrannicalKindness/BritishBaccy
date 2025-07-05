@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BritishBaccy</title>
+  <!-- Include particles.js library (assuming CDN usage) -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <style>
+      :root {
+        --gold: #FFD600;
+        --gold-dark: #C7A100;
+        --rainbow: linear-gradient(90deg, #ff0055, #fffa00, #00ff94, #00c3ff, #a259ff, #ff0055);
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #111;
+        color: #f5f5f5;
+        width: 100vw;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+      }
+      body > *:not(#particles-js) {
+        position: relative;
+        z-index: 1;
+      }
+      header, nav, main, section, footer, .product-card, form {
+        background: #181818ee;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px #000a, 0 0 0 #FFD60000;
+        margin: 18px auto;
+        max-width: 900px;
+        padding: 18px 24px;
+      }
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(0,0,0,0.85);
+        box-shadow: 0 2px 8px #000a;
+      }
+      nav a {
+        display: inline-block;
+        background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+        color: #111;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 18px;
+        margin: 0 2px;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: box-shadow .4s, background .3s, color .2s, transform .2s;
+        box-shadow: 0 2px 8px #FFD60022;
+        cursor: pointer;
+      }
+      nav a:hover, nav a.active {
+        background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+        color: #000;
+        box-shadow: 0 2px 8px #FFD60022, 0 0 16px 2px #FFD60099;
+        transform: translateY(-2px) scale(1.04);
+      }
+      .product-card {
+        display: inline-block;
+        vertical-align: top;
+        width: 260px;
+        margin: 16px;
+        background: #181818;
+        border-radius: 18px;
+        box-shadow: 0 4px 32px #FFD60022;
+        padding: 24px 16px 20px 16px;
+        text-align: center;
+      }
+      .product-card img {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        border-radius: 12px;
+        background: #222;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 12px #FFD60033;
+      }
+      .product-card h2 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #FFD600;
+        margin-bottom: 6px;
+      }
+      .product-card p {
+        font-size: .98rem;
+        color: #f5f5f5;
+        margin-bottom: 12px;
+      }
+      .product-card button {
+        background: linear-gradient(90deg, #FFD600 60%, #C7A100 100%);
+        color: #111;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 0;
+        margin: 4px 0;
+        font-size: .97rem;
+        font-weight: 600;
+        width: 90%;
+        cursor: pointer;
+        box-shadow: 0 2px 8px #FFD60022;
+        transition: box-shadow .4s, background .3s, color .2s, transform .2s;
+      }
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        margin: 12px 0;
+        background: #222;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px #FFD60022;
+      }
+      .cart-item-info {
+        flex: 1;
+        min-width: 200px;
+      }
+      .cart-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .quantity-controls button {
+        background: #333;
+        color: #FFD600;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        width: 32px;
+        height: 32px;
+      }
+      .quantity-controls span {
+        min-width: 32px;
+        text-align: center;
+        font-weight: 600;
+        color: #FFD600;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      .save-btn, .remove-btn {
+        background: none;
+        border: 1px solid #FFD600;
+        color: #FFD600;
+        border-radius: 6px;
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: .9rem;
+        transition: all .3s;
+      }
+      .save-btn:hover, .remove-btn:hover {
+        background: #FFD600;
+        color: #111;
+      }
+      .cart-summary {
+        margin-top: 24px;
+        padding: 24px;
+        background: #222;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px #FFD60022;
+      }
+      .cart-total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 16px;
+      }
+      #checkout-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.1rem;
+      }
+      .product-card button:active {
+        background: linear-gradient(90deg, #C7A100 60%, #FFD600 100%);
+        color: #000;
+        transform: scale(0.98);
+      }
+      form {
+        background: #181818;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px #FFD60022;
+        padding: 18px 24px;
+        margin: 0 auto 18px auto;
+        max-width: 400px;
+        color: #f5f5f5;
+      }
+      form input {
+        width: 90%;
+        padding: 8px;
+        margin: 6px 0 12px 0;
+        border-radius: 8px;
+        border: 1px solid #FFD60044;
+        background: #222;
+        color: #FFD600;
+        font-size: 1rem;
+      }
+      form button {
+        background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+        color: #111;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        margin-bottom: 8px;
+      }
+      footer {
+        background: #181818;
+        color: #fff;
+        padding: 32px 0 0 0;
+        margin-top: 0;
+        text-align: center;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      footer img {
+        height: 28px;
+        margin: 0 6px 0 0;
+        vertical-align: middle;
+      }
+      .site-section {
+        display: none;
+      }
+      .site-section.active {
+        display: block;
+      }
+      #logo-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #181818ee;
+        border-radius: 32px;
+        box-shadow: 0 2px 16px #000a;
+        padding: 18px 32px;
+        margin: 36px auto 18px auto;
+        width: fit-content;
+        max-width: 95vw;
+      }
+      #site-logo {
+        display: block;
+        height: 159px;
+        max-width: 90vw;
+        border-radius: 24px;
+        transition: filter 0.4s, box-shadow 0.4s;
+        box-shadow: 0 0 0px 0px #fff0;
+      }
+      #site-logo.rainbow {
+        animation: rainbow-glow 1.5s linear infinite;
+        filter: drop-shadow(0 0 32px #fff8) drop-shadow(0 0 64px #FFD60088);
+      }
+      @keyframes rainbow-glow {
+        0% { filter: drop-shadow(0 0 32px #ff005588) drop-shadow(0 0 64px #FFD60044); }
+        20% { filter: drop-shadow(0 0 32px #fffa0088) drop-shadow(0 0 64px #FFD60044); }
+        40% { filter: drop-shadow(0 0 32px #00ff9488) drop-shadow(0 0 64px #FFD60044); }
+        60% { filter: drop-shadow(0 0 32px #00c3ff88) drop-shadow(0 0 64px #FFD60044); }
+        80% { filter: drop-shadow(0 0 32px #a259ff88) drop-shadow(0 0 64px #FFD60044); }
+        100% { filter: drop-shadow(0 0 32px #ff005588) drop-shadow(0 0 64px #FFD60044); }
+      }
+    </style>
+</head>
+<body>
+  <!-- Particle background container -->
+  <div id="particles-js"></div>
+
+  <!-- Original content starts here -->
+  <header>
+    <div id="logo-box">
+      <img id="site-logo" src="britishbaccy-logo.png" alt="BritishBaccy Logo" style="height:159px;max-width:90vw;">
+    </div>
+    <div style="display:flex;justify-content:flex-end;align-items:center;width:100%;max-width:900px;margin:0 auto;">
+      <button id="cart-btn" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</button>
+    </div>
+  </header>
+  <nav>
+    <a href="#products" class="nav-btn" data-section="products">Catalogue</a>
+    <a href="#about" class="nav-btn" data-section="about">About us</a>
+    <a href="#delivery" class="nav-btn" data-section="delivery">Delivery</a>
+    <a href="#whysocheap" class="nav-btn" data-section="whysocheap">Why Cheap?</a>
+    <a href="#reviews" class="nav-btn" data-section="reviews">Reviews</a>
+    <a href="#returns" class="nav-btn" data-section="returns">Returns</a>
+    <a href="#contact" class="nav-btn" data-section="contact">Contact</a>
+    <a href="#track" class="nav-btn" data-section="track">Track</a>
+    <a href="#register" class="nav-btn" data-section="register">Register</a>
+    <a href="#login" class="nav-btn" data-section="login">Login</a>
+  </nav>
+  <main id="products" class="site-section active">
+    <h1>Our Premium Products</h1>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:24px;">
+      <div class="product-card">
+        <img src="amberleafuk.jpg" alt="Amber Leaf 50g (UK)">
+        <h2>Amber Leaf 50g (UK)</h2>
+        <p>Classic British rolling tobacco. Smooth, fresh, rich aroma.</p>
+        <p>£19.99</p>
+        <button onclick="addToCart({name: 'Amber Leaf 50g (UK)', price: 19.99})">Add to Cart</button>
+        <button onclick="buyNow(0)">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="amberleafbelgium.jpg" alt="Amber Leaf 50g (Belgium)">
+        <h2>Amber Leaf 50g (Belgium)</h2>
+        <p>Continental blend, mellow, unbeatable price.</p>
+        <p>£16.99</p>
+        <button onclick="addToCart({name: 'Amber Leaf 50g (Belgium)', price: 16.99})">Add to Cart</button>
+        <button onclick="buyNow(1)">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="rothmans.jpg" alt="Rothmans Cigarettes">
+        <h2>Rothmans Cigarettes</h2>
+        <p>Refined, full-bodied flavour. Premium quality.</p>
+        <p>£12.99</p>
+        <button onclick="addToCart({name: 'Rothmans Cigarettes', price: 12.99})">Add to Cart</button>
+        <button onclick="buyNow(2)">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="goldenvirginia.jpg" alt="Golden Virginia 50g">
+        <h2>Golden Virginia 50g</h2>
+        <p>Smooth, classic, and aromatic. A UK favourite.</p>
+        <p>£20.49</p>
+        <button onclick="addToCart({name: 'Golden Virginia 50g', price: 20.49})">Add to Cart</button>
+        <button onclick="buyNow(3)">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="silkcut.jpg" alt="Silk Cut Cigarettes">
+        <h2>Silk Cut Cigarettes</h2>
+        <p>Light, smooth, and easy. For the discerning smoker.</p>
+        <p>£13.49</p>
+        <button onclick="addToCart({name: 'Silk Cut Cigarettes', price: 13.49})">Add to Cart</button>
+        <button onclick="buyNow(4)">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="bensongold.jpg" alt="Benson & Hedges Gold">
+        <h2>Benson & Hedges Gold</h2>
+        <p>Premium taste, iconic British brand.</p>
+        <p>£14.99</p>
+        <button onclick="addToCart({name: 'Benson & Hedges Gold', price: 14.99})">Add to Cart</button>
+        <button onclick="buyNow(5)">Buy Now</button>
+      </div>
+      <div class="product-card">
+        <img src="marlborored.jpg" alt="Marlboro Red">
+        <h2>Marlboro Red</h2>
+        <p>Bold, rich, and world-renowned.</p>
+        <p>£15.99</p>
+        <button onclick="addToCart({name: 'Marlboro Red', price: 15.99})">Add to Cart</button>
+        <button onclick="buyNow(6)">Buy Now</button>
+      </div>
+    </div>
+  </main>
+  <main id="about" class="site-section">
+    <h1>Who Are We?</h1>
+    <p>BritishBaccy is dedicated to providing premium tobacco products at unbeatable prices, with a focus on quality, tradition, and customer satisfaction.</p>
+  </main>
+  <main id="delivery" class="site-section">
+    <h1>Delivery</h1>
+    <p>Fast, secure, and discreet delivery across the UK and Europe. Track your order anytime from the navigation bar.</p>
+  </main>
+  <main id="whysocheap" class="site-section">
+    <h1>Why So Cheap?</h1>
+    <p>We source directly from trusted suppliers and keep our overheads low, passing the savings on to you.</p>
+  </main>
+  <main id="reviews" class="site-section">
+    <h1>Reviews</h1>
+    <p>Our customers love us! Read real reviews and see why we’re the UK’s favourite online tobacconist.</p>
+  </main>
+  <main id="returns" class="site-section">
+    <h1>Returns</h1>
+    <p>Shop with confidence. We offer a hassle-free returns policy for your peace of mind.</p>
+  </main>
+  <main id="contact" class="site-section">
+    <h1>Contact</h1>
+    <p>Questions? Our friendly support team is here to help. Email us or use the contact form for a quick response.</p>
+  </main>
+  <main id="track" class="site-section">
+    <h1>Track Your Order</h1>
+    <form>
+      <label>Order ID: <input type="text"></label><br>
+      <button type="submit">Track</button>
+    </form>
+  </main>
+  <main id="register" class="site-section">
+    <h1>Register</h1>
+    <form>
+      <label>Email: <input type="email"></label><br>
+      <label>Password: <input type="password"></label><br>
+      <label>Confirm Password: <input type="password"></label><br>
+      <label>Nickname: <input type="text" placeholder="Choose a nickname for your account"></label><br>
+      <button type="submit">Register</button><br>
+      <a href="#login" class="nav-btn">Already have an account? Login</a><br>
+      <a href="#forgot" class="nav-btn">Forgot Password?</a>
+    </form>
+  </main>
+  <main id="login" class="site-section">
+    <h1>Login</h1>
+    <form>
+      <label>Email: <input type="email"></label><br>
+      <label>Password: <input type="password"></label><br>
+      <button type="submit">Login</button><br>
+      <a href="#register" class="nav-btn">Register</a><br>
+      <a href="#forgot" class="nav-btn">Forgot Password?</a>
+    </form>
+  </main>
+  <main id="forgot" class="site-section">
+    <h1>Forgot Password?</h1>
+    <form>
+      <label>Enter your email: <input type="email"></label><br>
+      <button type="submit">Send Reset Link</button>
+    </form>
+  </main>
+  <main id="payment" class="site-section">
+    <h1>Payment</h1>
+    <div id="payment-form"></div>
+  </main>
+  <main id="cart" class="site-section">
+    <h1>Shopping Cart</h1>
+    <div id="cart-items" class="cart-items">
+      <!-- Cart items will be dynamically added here -->
+    </div>
+    <div class="cart-summary">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cart-total">£0.00</span>
+      </div>
+      <button id="checkout-btn" class="gold-btn">Proceed to Checkout</button>
+    </div>
+  </main>
+  <main id="activitylog" class="site-section">
+    <h1>Customer Activity Log</h1>
+    <div id="activity-log">(Admin log placeholder)</div>
+  </main>
+  <footer>
+    <div>
+      We Accept: <img src="visa.jpg" alt="Visa"> <img src="mastercard.jpg" alt="Mastercard">
+    </div>
+    <p> 2025 BritishBaccy. All Rights Reserved.</p>
+  </footer>
+  <!-- Initialize particles.js -->
+  <script>
+    particlesJS('particles-js', {
+      "particles": {
+        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": "#ffffff" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.5, "random": false },
+        "size": { "value": 3, "random": true },
+        "move": { "enable": true, "speed": 6, "direction": "none", "random": false },
+        "line_linked": { "enable": true, "distance": 150, "opacity": 0.4, "width": 1 }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": { "enable": true, "mode": "repulse" },
+          "onclick": { "enable": true, "mode": "push" },
+          "resize": true
+        },
+        "modes": {
+          "repulse": { "distance": 100, "duration": 0.4 },
+          "push": { "particles_nb": 4 }
+        }
+      },
+      "retina_detect": true
+    });
+    // --- SPA navigation logic ---
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.site-section');
+    function showSection(id) {
+      sections.forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+      navBtns.forEach(b => b.classList.remove('active'));
+      const btn = Array.from(navBtns).find(b => b.dataset.section === id);
+      if (btn) btn.classList.add('active');
+    }
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        showSection(btn.dataset.section);
+      });
+    });
+    // Show default section on load
+    showSection('products');
+    // Cart placeholder logic
+// --- Cart logic ---
+const cartBtn = document.getElementById('cart-btn');
+const cartCount = document.getElementById('cart-count');
+function getCart() {
+  return JSON.parse(localStorage.getItem('cart') || '[]');
+}
+function setCart(cart) {
+  localStorage.setItem('cart', JSON.stringify(cart));
+  cartCount.textContent = cart.length;
+  updateCartDisplay();
+}
+function addToCart(product) {
+  const cart = getCart();
+  cart.push(product);
+  setCart(cart);
+  logEvent('cart_add', product);
+}
+function removeFromCart(index) {
+  const cart = getCart();
+  cart.splice(index, 1);
+  setCart(cart);
+  logEvent('cart_remove', { product: cart[index], index });
+}
+function updateQuantity(index, newQuantity) {
+  const cart = getCart();
+  if (newQuantity > 0) {
+    cart[index].quantity = newQuantity;
+  } else {
+    removeFromCart(index);
+  }
+  setCart(cart);
+  logEvent('cart_update', { product: cart[index], index, quantity: newQuantity });
+}
+function saveForLater(index) {
+  const cart = getCart();
+  const product = cart[index];
+  const savedItems = JSON.parse(localStorage.getItem('savedItems') || '[]');
+  savedItems.push(product);
+  localStorage.setItem('savedItems', JSON.stringify(savedItems));
+  removeFromCart(index);
+  logEvent('cart_save_for_later', { product, index });
+}
+function updateCartDisplay() {
+  const cart = getCart();
+  const cartItems = document.getElementById('cart-items');
+  const cartTotal = document.getElementById('cart-total');
+  
+  if (!cartItems || !cartTotal) return;
+  
+  cartItems.innerHTML = cart.length ? cart.map((item, index) => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <h3>${item.name}</h3>
+        <p>£${item.price.toFixed(2)} each</p>
+      </div>
+      <div class="cart-item-actions">
+        <div class="quantity-controls">
+          <button onclick="updateQuantity(${index}, ${cart[index].quantity - 1})">-</button>
+          <span>${cart[index].quantity || 1}</span>
+          <button onclick="updateQuantity(${index}, ${cart[index].quantity + 1})">+</button>
+        </div>
+        <div class="action-buttons">
+          <button onclick="saveForLater(${index})" class="save-btn">Save for Later</button>
+          <button onclick="removeFromCart(${index})" class="remove-btn">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join('') : '<p>Your cart is empty</p>';
+  
+  const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+  cartTotal.textContent = `£${total.toFixed(2)}`;
+}
+function clearCart() {
+  setCart([]);
+  updateCartDisplay();
+}
+function updateCartCount() {
+  cartCount.textContent = getCart().length;
+  updateCartDisplay();
+}
+// --- Product data (sync with product cards) ---
+const products = [
+  { name: 'Amber Leaf 50g (UK)', price: 19.99, img: 'amberleafuk.jpg', desc: 'Classic British rolling tobacco. Smooth, fresh, rich aroma.' },
+  { name: 'Amber Leaf 50g (Belgium)', price: 16.99, img: 'amberleafbelgium.jpg', desc: 'Continental blend, mellow, unbeatable price.' },
+  { name: 'Rothmans Cigarettes', price: 12.99, img: 'rothmans.jpg', desc: 'Refined, full-bodied flavour. Premium quality.' },
+  { name: 'Golden Virginia 50g', price: 20.49, img: 'goldenvirginia.jpg', desc: 'Smooth, classic, and aromatic. A UK favourite.' },
+  { name: 'Silk Cut Cigarettes', price: 13.49, img: 'silkcut.jpg', desc: 'Light, smooth, and easy. For the discerning smoker.' },
+  { name: 'Benson & Hedges Gold', price: 14.99, img: 'bensongold.jpg', desc: 'Premium taste, iconic British brand.' },
+  { name: 'Marlboro Red', price: 15.99, img: 'marlborored.jpg', desc: 'Bold, rich, and world-renowned.' }
+];
+// --- Buy Now and Add to Cart buttons ---
+document.querySelectorAll('.product-card').forEach((card, i) => {
+  const buyBtn = card.querySelector('.buy-btn');
+  const addBtn = card.querySelector('.addcart-btn');
+  if (buyBtn) buyBtn.onclick = () => buyNow(i);
+  if (addBtn) addBtn.onclick = () => {
+    addToCart(products[i]);
+    updateCartCount();
+    alert('Added to cart!');
+  };
+});
+function buyNow(idx) {
+  const product = products[idx];
+  addToCart(product);
+  const cart = getCart();
+  if (!cart.length) return alert('Your cart is empty!');
+  logEvent('cart_checkout', cart);
+  checkoutNow(cart);
+}
+cartBtn.addEventListener('click', () => {
+  const cart = getCart();
+  if (!cart.length) return alert('Your cart is empty!');
+  logEvent('cart_checkout', cart);
+  checkoutNow(cart);
+});
+updateCartCount();
+
+// --- Logging ---
+function logEvent(type, data) {
+  const logs = JSON.parse(localStorage.getItem('eventlog') || '[]');
+  logs.push({ type, data, time: new Date().toISOString() });
+  localStorage.setItem('eventlog', JSON.stringify(logs));
+}
+    // --- Rainbow logo hover ---
+    const logo = document.getElementById('site-logo');
+    if (logo) {
+      logo.addEventListener('mouseenter',()=>logo.classList.add('rainbow'));
+      logo.addEventListener('mouseleave',()=>logo.classList.remove('rainbow'));
+      // Optional: click logo to go to Why So Cheap
+      logo.addEventListener('click',()=>showSection('whysocheap'));
+    }
+    // --- Checkout function ---
+    // --- Stripe Integration ---
+    // 1. Add your Stripe publishable key below where it says 'YOUR_STRIPE_PUBLISHABLE_KEY'.
+    // 2. You must also set up a backend endpoint to create Stripe Checkout Sessions (see below for details).
+    // 3. See comments for what to replace and where.
+
+    // Load Stripe.js
+    if (!window.Stripe) {
+      const stripeScript = document.createElement('script');
+      stripeScript.src = 'https://js.stripe.com/v3/';
+      document.head.appendChild(stripeScript);
+    }
+
+    function checkoutNow(items) {
+      if (!Array.isArray(items) || !items.length) return alert("Cart is empty.");
+      logEvent('checkout_initiated', { items });
+      showSection('payment');
+      const paymentForm = document.getElementById('payment-form');
+      if (paymentForm) {
+        const cartTotal = items.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
+        paymentForm.innerHTML = `
+          <h2>Payment Information</h2>
+          <p>Total: £${cartTotal.toFixed(2)}</p>
+          <button id="stripe-checkout-btn" class="gold-btn" style="font-size:1.2rem;">Pay with Card (Stripe)</button>
+          <div style="margin-top:16px;font-size:0.95em;color:#FFD600;">You will be redirected to a secure Stripe checkout page.</div>
+        `;
+        // Stripe Checkout button handler
+        document.getElementById('stripe-checkout-btn').onclick = async function() {
+          // 1. Replace with your Stripe publishable key:
+          // Use your Stripe TEST publishable key for testing
+          const stripe = Stripe('pk_live_51Rg3n2FphX9gu7mJKsh3Q4yoA4PyLZXcs4kuUs4KJueDstyGIMZcmGHmuaWXrVzrs9fBRVByOfAEYpjeFbrlDkzI00weWvGWBt'); // <-- REPLACE THIS
+
+          // 2. Send cart data to your backend to create a Checkout Session
+          //    Replace the URL below with your backend endpoint that creates a Stripe Checkout Session
+          //    (see https://stripe.com/docs/payments/checkout/accept-a-payment#create-checkout-session)
+          const response = await fetch('http://localhost:4242/create-checkout-session', { // <-- REPLACE THIS
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: items.map(item => ({
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity || 1
+              }))
+            })
+          });
+          const session = await response.json();
+          if (!session.id) {
+            alert('Payment error: could not create Stripe session.');
+            return;
+          }
+          // 3. Redirect to Stripe Checkout
+          const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
+          if (error) {
+            alert(error.message);
+          }
+        };
+      }
+    }
+  </script>
+</body>
+</html>
