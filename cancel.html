@@ -1,23 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Cancelled - BritishBaccy</title>
-  <style>
-    body { background: #181818; color: #FFD600; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-    .box { background: #222; border-radius: 16px; box-shadow: 0 2px 16px #FFD60044; padding: 40px 32px; text-align: center; max-width: 400px; }
-    h1 { color: #FFD600; margin-bottom: 16px; }
-    p { color: #fff; font-size: 1.1rem; }
-    a { display: inline-block; margin-top: 24px; color: #FFD600; text-decoration: underline; font-weight: bold; }
-    a:hover { color: #fff; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Cancelled - BritishBaccy</title>
+    <style>
+        :root {
+            --gold: #FFD600;
+            --gold-dark: #C7A100;
+            --red: #ff4444;
+            --red-dark: #cc3333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .cancel-container {
+            background: #181818;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(255, 68, 68, 0.2);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid var(--red);
+        }
+        
+        .cancel-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: #fff;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        h1 {
+            color: var(--red);
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .cancel-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #f5f5f5;
+        }
+        
+        .error-details {
+            background: #2a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+            border-left: 4px solid var(--red);
+        }
+        
+        .error-details h3 {
+            color: var(--red);
+            margin-bottom: 15px;
+        }
+        
+        .error-details ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .error-details li {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .error-details li:last-child {
+            border-bottom: none;
+        }
+        
+        .error-details li::before {
+            content: "•";
+            color: var(--red);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .help-section {
+            background: #222;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .help-section h3 {
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        
+        .help-section p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .contact-info {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .contact-info strong {
+            color: var(--gold);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+            color: #111;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 214, 0, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gold);
+            color: #111;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, var(--red-dark), var(--red));
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 8px 20px rgba(255, 68, 68, 0.4);
+        }
+        
+        @media (max-width: 600px) {
+            .cancel-container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="box">
-    <h1>Payment Cancelled</h1>
-    <p>Your payment was not completed.<br>You can try again or contact support if you need help.</p>
-    <a href="britishbaccy-singlefileORIG.html">Return to Home</a>
-  </div>
+    <div class="cancel-container">
+        <div class="cancel-icon">✕</div>
+        
+        <h1 id="error-title">Registration Cancelled</h1>
+        
+        <div class="cancel-message" id="error-message">
+            Your registration was cancelled or encountered an error. Don't worry, you can try again!
+        </div>
+        
+        <div class="error-details" id="error-details" style="display: none;">
+            <h3>Common Issues:</h3>
+            <ul>
+                <li>Email address already registered</li>
+                <li>Passwords don't match</li>
+                <li>Invalid email format</li>
+                <li>Password too short (minimum 6 characters)</li>
+                <li>Network connection issues</li>
+                <li>Server temporarily unavailable</li>
+            </ul>
+        </div>
+        
+        <div class="help-section">
+            <h3>Need Help?</h3>
+            <p>If you're having trouble registering, here are some things you can try:</p>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 5px 0;">• Use a different email address</li>
+                <li style="padding: 5px 0;">• Check your internet connection</li>
+                <li style="padding: 5px 0;">• Clear your browser cache</li>
+                <li style="padding: 5px 0;">• Try again in a few minutes</li>
+            </ul>
+            
+            <div class="contact-info">
+                <strong>Still having issues?</strong><br>
+                Email: BritishBaccy@gmail.com<br>
+                Phone & WhatsApp: 07423544954<br>
+                Available: Monday to Friday, 10:00am to 09:00pm
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/#register" class="btn">Try Again</a>
+            <a href="/#login" class="btn btn-secondary">Login Instead</a>
+            <a href="/" class="btn btn-secondary">Go Home</a>
+        </div>
+    </div>
+    
+    <script>
+        // Check URL parameters for specific error information
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const type = urlParams.get('type');
+        
+        // Update content based on error type
+        if (error || type) {
+            const errorTitle = document.getElementById('error-title');
+            const errorMessage = document.getElementById('error-message');
+            const errorDetails = document.getElementById('error-details');
+            
+            switch (type) {
+                case 'payment':
+                    errorTitle.textContent = 'Payment Cancelled';
+                    errorMessage.textContent = 'Your payment was cancelled. Your cart items are still saved and you can try again anytime.';
+                    break;
+                case 'registration':
+                    errorTitle.textContent = 'Registration Failed';
+                    errorMessage.textContent = 'There was an issue creating your account. Please check the details below and try again.';
+                    errorDetails.style.display = 'block';
+                    break;
+                case 'login':
+                    errorTitle.textContent = 'Login Failed';
+                    errorMessage.textContent = 'Unable to log you in. Please check your credentials and try again.';
+                    break;
+                case 'verification':
+                    errorTitle.textContent = 'Email Verification Failed';
+                    errorMessage.textContent = 'The verification link is invalid or has expired. Please request a new verification email.';
+                    break;
+                default:
+                    if (error) {
+                        errorMessage.textContent = decodeURIComponent(error);
+                        errorDetails.style.display = 'block';
+                    }
+            }
+        }
+        
+        // Auto-redirect after 15 seconds if user doesn't interact
+        let redirectTimer = setTimeout(() => {
+            window.location.href = '/';
+        }, 15000);
+        
+        // Cancel auto-redirect if user interacts with the page
+        document.addEventListener('click', () => {
+            clearTimeout(redirectTimer);
+        });
+        
+        document.addEventListener('keydown', () => {
+            clearTimeout(redirectTimer);
+        });
+        
+        // Show error animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.cancel-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.5s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+        
+        // Add countdown timer display
+        let countdown = 15;
+        const countdownElement = document.createElement('div');
+        countdownElement.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #FFD600;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: 1px solid #FFD600;
+        `;
+        countdownElement.textContent = `Redirecting in ${countdown}s`;
+        document.body.appendChild(countdownElement);
+        
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = `Redirecting in ${countdown}s`;
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                countdownElement.remove();
+            }
+        }, 1000);
+        
+        // Remove countdown on interaction
+        document.addEventListener('click', () => {
+            clearInterval(countdownInterval);
+            countdownElement.remove();
+        });
+    </script>
 </body>
 </html>

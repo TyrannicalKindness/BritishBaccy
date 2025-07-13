@@ -6,6 +6,13 @@
   <title>BritishBaccy</title>
   <!-- Include particles.js library (assuming CDN usage) -->
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <!-- Three.js for WebGL background -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
   <style>
       :root {
         --gold: #FFD600;
@@ -16,7 +23,7 @@
         margin: 0;
         padding: 0;
         font-family: 'Segoe UI', Arial, sans-serif;
-        background: #111;
+        background: transparent;
         color: #f5f5f5;
         width: 100vw;
         min-height: 100vh;
@@ -31,45 +38,121 @@
         z-index: 0;
         pointer-events: none;
       }
-      body > *:not(#particles-js) {
+      
+      /* WebGL Canvas Background */
+      #webgl-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -10;
+        pointer-events: none;
+      }
+      
+      body > *:not(#particles-js):not(#webgl-canvas) {
         position: relative;
         z-index: 1;
       }
       header, nav, main, section, footer, .product-card, form {
-        background: #181818ee;
+        /* background removed for header */
         border-radius: 16px;
         box-shadow: 0 2px 16px #000a, 0 0 0 #FFD60000;
         margin: 18px auto;
         max-width: 900px;
         padding: 18px 24px;
       }
-      nav {
+      header {
+        background: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 0 12px 0 !important;
+      }
+      #logo-box {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        background: rgba(0,0,0,0.85);
-        box-shadow: 0 2px 8px #000a;
+        align-items: flex-start;
+        background: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 32px auto 18px auto !important;
+        width: 100%;
+        max-width: 100vw;
       }
+      .logo-img {
+        height: 120px;
+        max-width: 320px;
+        margin: 0 auto;
+        display: block;
+      }
+      .header-flex {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        background: none !important;
+        box-shadow: none !important;
+        padding: 0 0 0 0;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px; /*gap between buttons*/
+        background: transparent;
+        box-shadow: none;
+        flex-wrap: nowrap;
+      }
+
       nav a {
-        display: inline-block;
-        background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+        flex: 1 1 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: #111;
         font-weight: 600;
-        border: none;
-        border-radius: 12px;
-        padding: 8px 18px;
-        margin: 0 2px;
+        border-radius: 9px;
+        padding: 5px 15px;
+        margin: auto;
         text-decoration: none;
         font-size: 1rem;
-        transition: box-shadow .4s, background .3s, color .2s, transform .2s;
-        box-shadow: 0 2px 8px #FFD60022;
+        min-height: 38px;
+        line-height: 1.2;
+        transition: box-shadow .3s, background .3s, color .2s, transform .2s;
         cursor: pointer;
+        box-sizing: border-box;
+        letter-spacing: 0.01em;
+        border: 3px solid #FFD600;
+        background: #FFD600;
+        box-shadow:
+          0 2px 8px #FFD60044,
+          0 4px 24px #FFD60022 inset,
+          0 1px 0 rgba(157, 157, 157, 0.533) inset,
+          0 0 0 3px rgba(191, 163, 3, 0.74) inset,
+          0 2px 8px #ff0000b5,
+          0 0 24px 0 #48ff0086;
+        position: relative;
+        overflow: hidden;
+        min-width: 0;
+        width: 100%;
+        white-space: nowrap;
+        text-align: center;
+        vertical-align: middle;
+        flex-shrink: 1;
+        flex-grow: 1;
+        flex-basis: 0;
+        max-width: 100%;
+        word-break: break-all;
+        user-select: none;
       }
       nav a:hover, nav a.active {
-        background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+        background: #FFD600;
         color: #000;
-        box-shadow: 0 2px 8px #FFD60022, 0 0 16px 2px #FFD60099;
-        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 8px 32px #FFD600cc, 0 2px 8px #FFD60044, 0 1px 0 #fff8 inset, 0 0 0 3px #fff8 inset, 0 2px 8px #FFD600, 0 0 32px 0 #FFD60055;
+        transform: translateY(-2px) scale(1.06);
+        border-color: #FFD600;
+        filter: brightness(1.15) drop-shadow(0 0 16px #FFD60088);
       }
       .product-card {
         display: inline-block;
@@ -250,55 +333,383 @@
       .site-section.active {
         display: block;
       }
-      #logo-box {
+      .cart-btn {
         display: flex;
-        justify-content: center;
         align-items: center;
-        background: #181818ee;
-        border-radius: 32px;
-        box-shadow: 0 2px 16px #000a;
-        padding: 18px 32px;
-        margin: 36px auto 18px auto;
-        width: fit-content;
-        max-width: 95vw;
+        justify-content: center;
+        background: #FFD600;
+        border: 3px solid #FFD600;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px #FFD60044, 0 4px 24px #FFD60022 inset, 0 1px 0 rgba(157, 157, 157, 0.533) inset, 0 0 0 3px rgba(191, 163, 3, 0.74) inset, 0 2px 8px #ff0000b5, 0 0 24px 0 #48ff0086;
+        color: #111;
+        font-weight: 600;
+        font-size: 1rem;
+        min-height: 25px;
+        min-width: 25px;
+        padding: 5px 5px;
+        margin: 0 0 0 8px;
+        cursor: pointer;
+        transition: box-shadow .3s, background .3s, color .2s, transform .2s;
+        user-select: none;
+        outline: none;
+      }
+      .cart-btn:hover, .cart-btn:focus {
+        background: #FFD600;
+        color: #000;
+        box-shadow: 0 8px 32px #FFD600cc, 0 2px 8px #FFD60044, 0 1px 0 #fff8 inset, 0 0 0 3px #fff8 inset, 0 2px 8px #FFD600, 0 0 32px 0 #FFD60055;
+        transform: translateY(-2px) scale(1.06);
+        border-color: #FFD600;
+        filter: brightness(1.15) drop-shadow(0 0 16px #FFD60088);
+      }
+      .products-flex {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 24px;
+      }
+      .large-btn {
+        font-size: 1.2rem;
+      }
+      .stripe-note {
+        margin-top: 16px;
+        font-size: 0.95em;
+        color: #FFD600;
       }
       #site-logo {
+        position: relative;
+        animation: logo-breathe 4s ease-in-out infinite;
+        filter: drop-shadow(0 0 20px #FFD600aa) drop-shadow(0 0 40px #FFD60066) drop-shadow(0 8px 16px rgba(255, 214, 0, 0.4));
+      }
+      #site-logo::before {
+        content: '';
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        right: -15px;
+        bottom: -15px;
+        background: radial-gradient(circle, #FFD60033 0%, #FFD60066 30%, #FFD60044 50%, #FFD60022 70%, transparent 100%);
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 1;
+        animation: golden-glow-pulse 3s ease-in-out infinite;
+      }
+      #site-logo::after {
+        content: '';
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        right: -20px;
+        bottom: -20px;
+        background: radial-gradient(circle, transparent 40%, #FFD60011 50%, #FFD60022 60%, #FFD60033 70%, #FFD60044 80%, #FFD60022 90%, transparent 100%);
+        border-radius: 50%;
+        animation: golden-glow-rotate 6s linear infinite;
+        z-index: -2;
+        opacity: 0.8;
+      }
+      @keyframes logo-breathe {
+        0%, 100% { transform: scale(1.0); }
+        50% { transform: scale(1.03); }
+      }
+      @keyframes golden-glow-pulse {
+        0%, 100% { 
+          opacity: 0.8; 
+          transform: scale(1); 
+        }
+        50% { 
+          opacity: 1; 
+          transform: scale(1.05); 
+        }
+      }
+      @keyframes golden-glow-rotate {
+        0% { opacity: 0.6; transform: rotate(0deg); }
+        25% { opacity: 0.8; transform: rotate(90deg); }
+        50% { opacity: 0.6; transform: rotate(180deg); }
+        75% { opacity: 0.8; transform: rotate(270deg); }
+        100% { opacity: 0.6; transform: rotate(360deg); }
+      }
+      #logo-absolute {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        z-index: 10;
+        pointer-events: none;
+        height: 160px;
+      }
+      #logo-absolute #logo-box {
+        margin: 20px auto 0 auto !important;
+        pointer-events: auto;
+      }
+      main, nav, .header-flex, .site-section, .cart-summary, .product-card, form {
+        margin-top: 0px !important;
+      }
+      nav {
+        margin-top: -50px !important;
+      }
+      
+      /* Registration System Styles */
+      .error-message {
+        background: #2a1a1a;
+        color: #ff6b6b;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid #ff6b6b;
+        font-size: 0.9rem;
+      }
+      
+      .success-message {
+        background: #1a2a1a;
+        color: #51cf66;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid #51cf66;
+        font-size: 0.9rem;
+      }
+      
+      .field-error {
+        color: #ff6b6b;
+        font-size: 0.8rem;
         display: block;
-        height: 159px;
-        max-width: 90vw;
-        border-radius: 24px;
-        transition: filter 0.4s, box-shadow 0.4s;
-        box-shadow: 0 0 0px 0px #fff0;
+        margin-top: 4px;
       }
-      #site-logo.rainbow {
-        animation: rainbow-glow 1.5s linear infinite;
-        filter: drop-shadow(0 0 32px #fff8) drop-shadow(0 0 64px #FFD60088);
+      
+      .form-links {
+        text-align: center;
+        margin-top: 15px;
       }
-      @keyframes rainbow-glow {
-        0% { filter: drop-shadow(0 0 32px #ff005588) drop-shadow(0 0 64px #FFD60044); }
-        20% { filter: drop-shadow(0 0 32px #fffa0088) drop-shadow(0 0 64px #FFD60044); }
-        40% { filter: drop-shadow(0 0 32px #00ff9488) drop-shadow(0 0 64px #FFD60044); }
-        60% { filter: drop-shadow(0 0 32px #00c3ff88) drop-shadow(0 0 64px #FFD60044); }
-        80% { filter: drop-shadow(0 0 32px #a259ff88) drop-shadow(0 0 64px #FFD60044); }
-        100% { filter: drop-shadow(0 0 32px #ff005588) drop-shadow(0 0 64px #FFD60044); }
+      
+      .form-links a {
+        color: var(--gold);
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin: 5px 0;
+        display: inline-block;
+      }
+      
+      .form-links a:hover {
+        text-decoration: underline;
+      }
+      
+      .registration-benefits {
+        background: #222;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+      }
+      
+      .registration-benefits h3 {
+        color: var(--gold);
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+      
+      .registration-benefits ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .registration-benefits li {
+        padding: 4px 0;
+        font-size: 0.9rem;
+        color: #f5f5f5;
+      }
+      
+      .form-description {
+        color: #ccc;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        line-height: 1.4;
+      }
+      
+      .form-options {
+        margin: 10px 0;
+      }
+      
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #f5f5f5;
+        cursor: pointer;
+      }
+      
+      .checkbox-label input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+      }
+      
+      .btn-loading {
+        display: none;
+      }
+      
+      .btn-secondary {
+        background: transparent;
+        color: var(--gold);
+        border: 2px solid var(--gold);
+      }
+      
+      .btn-secondary:hover {
+        background: var(--gold);
+        color: #111;
+      }
+      
+      .btn-danger {
+        background: linear-gradient(90deg, #cc3333, #ff4444);
+        color: #fff;
+      }
+      
+      .btn-danger:hover {
+        background: linear-gradient(90deg, #ff4444, #ff6666);
+      }
+      
+      /* Profile Styles */
+      .loading-message {
+        text-align: center;
+        color: var(--gold);
+        font-size: 1.1rem;
+        padding: 40px;
+      }
+      
+      .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #222;
+        border-radius: 12px;
+      }
+      
+      .profile-avatar {
+        width: 80px;
+        height: 80px;
+        background: var(--gold);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #111;
+        margin-right: 20px;
+      }
+      
+      .profile-info h2 {
+        color: var(--gold);
+        margin: 0 0 5px 0;
+      }
+      
+      .profile-info p {
+        color: #ccc;
+        margin: 0 0 10px 0;
+      }
+      
+      .profile-status {
+        background: #51cf66;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+      
+      .profile-sections {
+        display: grid;
+        gap: 20px;
+      }
+      
+      .profile-section {
+        background: #222;
+        border-radius: 12px;
+        padding: 20px;
+      }
+      
+      .profile-section h3 {
+        color: var(--gold);
+        margin-bottom: 15px;
+      }
+      
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+      }
+      
+      .stat-item {
+        text-align: center;
+        padding: 15px;
+        background: #333;
+        border-radius: 8px;
+      }
+      
+      .stat-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--gold);
+      }
+      
+      .stat-label {
+        font-size: 0.9rem;
+        color: #ccc;
+      }
+      
+      .user-logged-in .nav-btn[data-section="register"],
+      .user-logged-in .nav-btn[data-section="login"] {
+        display: none;
+      }
+      
+      .user-logged-out .nav-btn[data-section="profile"] {
+        display: none;
+      }
+      
+      @media (max-width: 768px) {
+        .profile-header {
+          flex-direction: column;
+          text-align: center;
+        }
+        
+        .profile-avatar {
+          margin-right: 0;
+          margin-bottom: 15px;
+        }
+        
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
+    <script src="galaxy-particles.js"></script>
 </head>
 <body>
+  <!-- WebGL Canvas Background -->
+  <canvas id="webgl-canvas"></canvas>
+  
   <!-- Particle background container -->
   <div id="particles-js"></div>
 
   <!-- Original content starts here -->
-  <header>
+  <!-- Logo absolutely centered at top -->
+  <div id="logo-absolute">
     <div id="logo-box">
-      <img id="site-logo" src="britishbaccy-logo.png" alt="BritishBaccy Logo" style="height:159px;max-width:90vw;">
+      <img id="site-logo" src="britishbaccy-logo.png" alt="BritishBaccy Logo" class="logo-img">
     </div>
-    <div style="display:flex;justify-content:flex-end;align-items:center;width:100%;max-width:900px;margin:0 auto;">
-      <button id="cart-btn" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</button>
+  </div>
+  <header>
+    <div class="header-flex">
+      <button id="cart-btn" class="cart-btn" aria-label="View cart">
+        <img src="cart-modern.svg" alt="Cart" class="cart-icon">
+        <span id="cart-count" class="cart-count">0</span>
+      </button>
     </div>
   </header>
   <nav>
     <a href="#products" class="nav-btn" data-section="products">Catalogue</a>
+    <a href="#cart" class="nav-btn" data-section="cart">Cart</a>
     <a href="#about" class="nav-btn" data-section="about">About us</a>
     <a href="#delivery" class="nav-btn" data-section="delivery">Delivery</a>
     <a href="#whysocheap" class="nav-btn" data-section="whysocheap">Why Cheap?</a>
@@ -311,7 +722,7 @@
   </nav>
   <main id="products" class="site-section active">
     <h1>Our Premium Products</h1>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:24px;">
+    <div class="products-flex">
       <div class="product-card">
         <img src="amberleafuk.jpg" alt="Amber Leaf 50g (UK)">
         <h2>Amber Leaf 50g (UK)</h2>
@@ -372,27 +783,30 @@
   </main>
   <main id="about" class="site-section">
     <h1>Who Are We?</h1>
-    <p>BritishBaccy is dedicated to providing premium tobacco products at unbeatable prices, with a focus on quality, tradition, and customer satisfaction.</p>
+    <p>BritishBaccy is a new online tobacconist,dedicated to provide premium tobacco products at unbeatable prices. We focus on quality, tradition, and customer satisfaction. We want to build a community of happy customers who love our products. If, for any reason, you are unsatisfied, we offer a hassle-free return policy, simply return the item you're unhappy with and receive either a full refund or a replacement, as you wish.  </p>
   </main>
   <main id="delivery" class="site-section">
     <h1>Delivery</h1>
-    <p>Fast, secure, and discreet delivery across the UK and Europe. Track your order anytime from the navigation bar.</p>
+    <p>Fast, secure, and discreet. Every package is tracked for delivery across UK and Europe. Hint: Hey! Psst! We've made tracking easy for you! Track your order anytime from the navigation bar!.</p>
   </main>
   <main id="whysocheap" class="site-section">
     <h1>Why So Cheap?</h1>
-    <p>We source directly from trusted suppliers and keep our overheads low, passing the savings on to you.</p>
+    <p>We source directly from trusted suppliers, ensuring authenticity and quality. We keep our overheads low, passing the savings on to you! It is also a strategy we are implementing to support our community of happy customers. We're keeping our prices competetively low while the business develops. After 30-60 days, all prices will increase.</p>
   </main>
   <main id="reviews" class="site-section">
     <h1>Reviews</h1>
-    <p>Our customers love us! Read real reviews and see why we’re the UK’s favourite online tobacconist.</p>
+    <p>Love us or Hate us, we want to hear it! Write your review or Read real reviews and see why we're on the way to become the UK's favourite online tobacconist! (Note: Only customers who have placed orders can leave reviews. Register Today to become part of the community!) </p>
   </main>
   <main id="returns" class="site-section">
     <h1>Returns</h1>
-    <p>Shop with confidence. We offer a hassle-free returns policy for your peace of mind.</p>
+    <p>Buy from us with confidence and peace. We offer a hassle-free returns policy for your peace of mind. Don't like it? Pack it and send it back for a full refund. OR...you have the choice to let us surprise you with a replacement of a different product!</p>
   </main>
   <main id="contact" class="site-section">
     <h1>Contact</h1>
-    <p>Questions? Our friendly support team is here to help. Email us or use the contact form for a quick response.</p>
+    <p>Got Any Questions? Our friendly support team is always happy to help. Available Monday to Friday, 10:00am to 09:00pm. Email us directly or use the contact form for a quick response. 
+      Email: BritishBaccy@gmail.com 
+      Phone & WhatsApp: 07423544954
+     </p>
   </main>
   <main id="track" class="site-section">
     <h1>Track Your Order</h1>
@@ -403,32 +817,167 @@
   </main>
   <main id="register" class="site-section">
     <h1>Register</h1>
-    <form>
-      <label>Email: <input type="email"></label><br>
-      <label>Password: <input type="password"></label><br>
-      <label>Confirm Password: <input type="password"></label><br>
-      <label>Nickname: <input type="text" placeholder="Choose a nickname for your account"></label><br>
-      <button type="submit">Register</button><br>
-      <a href="#login" class="nav-btn">Already have an account? Login</a><br>
-      <a href="#forgot" class="nav-btn">Forgot Password?</a>
+    <form id="register-form">
+      <div id="register-error" class="error-message" style="display: none;"></div>
+      <div id="register-success" class="success-message" style="display: none;"></div>
+      
+      <label>Email: 
+        <input type="email" id="register-email" name="email" required>
+        <span class="field-error" id="email-error"></span>
+      </label><br>
+      
+      <label>Password: 
+        <input type="password" id="register-password" name="password" required minlength="6">
+        <span class="field-error" id="password-error"></span>
+      </label><br>
+      
+      <label>Confirm Password: 
+        <input type="password" id="register-confirm-password" name="confirmPassword" required>
+        <span class="field-error" id="confirm-password-error"></span>
+      </label><br>
+      
+      <label>Nickname: 
+        <input type="text" id="register-nickname" name="nickname" placeholder="Choose a nickname for your account" required>
+        <span class="field-error" id="nickname-error"></span>
+      </label><br>
+      
+      <button type="submit" id="register-btn">
+        <span class="btn-text">Register</span>
+        <span class="btn-loading" style="display: none;">Creating Account...</span>
+      </button><br>
+      
+      <div class="form-links">
+        <a href="#login" class="nav-btn">Already have an account? Login</a><br>
+        <a href="#forgot" class="nav-btn">Forgot Password?</a>
+      </div>
+      
+      <div class="registration-benefits">
+        <h3>Why Register?</h3>
+        <ul>
+          <li>✓ Track your orders easily</li>
+          <li>✓ Save your favorite products</li>
+          <li>✓ Get exclusive member discounts</li>
+          <li>✓ Faster checkout process</li>
+          <li>✓ Write and read product reviews</li>
+        </ul>
+      </div>
     </form>
   </main>
+  
   <main id="login" class="site-section">
     <h1>Login</h1>
-    <form>
-      <label>Email: <input type="email"></label><br>
-      <label>Password: <input type="password"></label><br>
-      <button type="submit">Login</button><br>
-      <a href="#register" class="nav-btn">Register</a><br>
-      <a href="#forgot" class="nav-btn">Forgot Password?</a>
+    <form id="login-form">
+      <div id="login-error" class="error-message" style="display: none;"></div>
+      <div id="login-success" class="success-message" style="display: none;"></div>
+      
+      <label>Email: 
+        <input type="email" id="login-email" name="email" required>
+        <span class="field-error" id="login-email-error"></span>
+      </label><br>
+      
+      <label>Password: 
+        <input type="password" id="login-password" name="password" required>
+        <span class="field-error" id="login-password-error"></span>
+      </label><br>
+      
+      <div class="form-options">
+        <label class="checkbox-label">
+          <input type="checkbox" id="remember-me" name="rememberMe">
+          <span class="checkmark"></span>
+          Remember me
+        </label>
+      </div>
+      
+      <button type="submit" id="login-btn">
+        <span class="btn-text">Login</span>
+        <span class="btn-loading" style="display: none;">Logging in...</span>
+      </button><br>
+      
+      <div class="form-links">
+        <a href="#register" class="nav-btn">Don't have an account? Register</a><br>
+        <a href="#forgot" class="nav-btn">Forgot Password?</a>
+      </div>
     </form>
   </main>
+  
   <main id="forgot" class="site-section">
     <h1>Forgot Password?</h1>
-    <form>
-      <label>Enter your email: <input type="email"></label><br>
-      <button type="submit">Send Reset Link</button>
+    <form id="forgot-form">
+      <div id="forgot-error" class="error-message" style="display: none;"></div>
+      <div id="forgot-success" class="success-message" style="display: none;"></div>
+      
+      <p class="form-description">
+        Enter your email address and we'll send you a link to reset your password.
+      </p>
+      
+      <label>Enter your email: 
+        <input type="email" id="forgot-email" name="email" required>
+        <span class="field-error" id="forgot-email-error"></span>
+      </label><br>
+      
+      <button type="submit" id="forgot-btn">
+        <span class="btn-text">Send Reset Link</span>
+        <span class="btn-loading" style="display: none;">Sending...</span>
+      </button>
+      
+      <div class="form-links">
+        <a href="#login" class="nav-btn">Back to Login</a><br>
+        <a href="#register" class="nav-btn">Create New Account</a>
+      </div>
     </form>
+  </main>
+  
+  <main id="profile" class="site-section">
+    <h1>My Profile</h1>
+    <div id="profile-content">
+      <div id="profile-loading" class="loading-message">Loading profile...</div>
+      <div id="profile-data" style="display: none;">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            <span id="profile-avatar-text"></span>
+          </div>
+          <div class="profile-info">
+            <h2 id="profile-nickname"></h2>
+            <p id="profile-email"></p>
+            <span class="profile-status" id="profile-status"></span>
+          </div>
+        </div>
+        
+        <div class="profile-sections">
+          <div class="profile-section">
+            <h3>Account Information</h3>
+            <form id="profile-form">
+              <label>Nickname: 
+                <input type="text" id="profile-nickname-input" name="nickname" required>
+              </label><br>
+              <button type="submit" class="btn-secondary">Update Profile</button>
+            </form>
+          </div>
+          
+          <div class="profile-section">
+            <h3>Account Stats</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-number" id="total-orders">0</span>
+                <span class="stat-label">Total Orders</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="member-since"></span>
+                <span class="stat-label">Member Since</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="profile-section">
+            <h3>Account Actions</h3>
+            <div class="action-buttons">
+              <button id="change-password-btn" class="btn-secondary">Change Password</button>
+              <button id="logout-btn" class="btn-danger">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
   <main id="payment" class="site-section">
     <h1>Payment</h1>
@@ -444,7 +993,7 @@
         <span>Total:</span>
         <span id="cart-total">£0.00</span>
       </div>
-      <button id="checkout-btn" class="gold-btn">Proceed to Checkout</button>
+      <button id="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
     </div>
   </main>
   <main id="activitylog" class="site-section">
@@ -457,32 +1006,8 @@
     </div>
     <p> 2025 BritishBaccy. All Rights Reserved.</p>
   </footer>
-  <!-- Initialize particles.js -->
+  
   <script>
-    particlesJS('particles-js', {
-      "particles": {
-        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-        "color": { "value": "#ffffff" },
-        "shape": { "type": "circle" },
-        "opacity": { "value": 0.5, "random": false },
-        "size": { "value": 3, "random": true },
-        "move": { "enable": true, "speed": 6, "direction": "none", "random": false },
-        "line_linked": { "enable": true, "distance": 150, "opacity": 0.4, "width": 1 }
-      },
-      "interactivity": {
-        "detect_on": "canvas",
-        "events": {
-          "onhover": { "enable": true, "mode": "repulse" },
-          "onclick": { "enable": true, "mode": "push" },
-          "resize": true
-        },
-        "modes": {
-          "repulse": { "distance": 100, "duration": 0.4 },
-          "push": { "particles_nb": 4 }
-        }
-      },
-      "retina_detect": true
-    });
     // --- SPA navigation logic ---
     const navBtns = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.site-section');
@@ -502,145 +1027,145 @@
     });
     // Show default section on load
     showSection('products');
-    // Cart placeholder logic
-// --- Cart logic ---
-const cartBtn = document.getElementById('cart-btn');
-const cartCount = document.getElementById('cart-count');
-function getCart() {
-  return JSON.parse(localStorage.getItem('cart') || '[]');
-}
-function setCart(cart) {
-  localStorage.setItem('cart', JSON.stringify(cart));
-  cartCount.textContent = cart.length;
-  updateCartDisplay();
-}
-function addToCart(product) {
-  const cart = getCart();
-  cart.push(product);
-  setCart(cart);
-  logEvent('cart_add', product);
-}
-function removeFromCart(index) {
-  const cart = getCart();
-  cart.splice(index, 1);
-  setCart(cart);
-  logEvent('cart_remove', { product: cart[index], index });
-}
-function updateQuantity(index, newQuantity) {
-  const cart = getCart();
-  if (newQuantity > 0) {
-    cart[index].quantity = newQuantity;
-  } else {
-    removeFromCart(index);
-  }
-  setCart(cart);
-  logEvent('cart_update', { product: cart[index], index, quantity: newQuantity });
-}
-function saveForLater(index) {
-  const cart = getCart();
-  const product = cart[index];
-  const savedItems = JSON.parse(localStorage.getItem('savedItems') || '[]');
-  savedItems.push(product);
-  localStorage.setItem('savedItems', JSON.stringify(savedItems));
-  removeFromCart(index);
-  logEvent('cart_save_for_later', { product, index });
-}
-function updateCartDisplay() {
-  const cart = getCart();
-  const cartItems = document.getElementById('cart-items');
-  const cartTotal = document.getElementById('cart-total');
-  
-  if (!cartItems || !cartTotal) return;
-  
-  cartItems.innerHTML = cart.length ? cart.map((item, index) => `
-    <div class="cart-item">
-      <div class="cart-item-info">
-        <h3>${item.name}</h3>
-        <p>£${item.price.toFixed(2)} each</p>
-      </div>
-      <div class="cart-item-actions">
-        <div class="quantity-controls">
-          <button onclick="updateQuantity(${index}, ${cart[index].quantity - 1})">-</button>
-          <span>${cart[index].quantity || 1}</span>
-          <button onclick="updateQuantity(${index}, ${cart[index].quantity + 1})">+</button>
-        </div>
-        <div class="action-buttons">
-          <button onclick="saveForLater(${index})" class="save-btn">Save for Later</button>
-          <button onclick="removeFromCart(${index})" class="remove-btn">Remove</button>
-        </div>
-      </div>
-    </div>
-  `).join('') : '<p>Your cart is empty</p>';
-  
-  const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-  cartTotal.textContent = `£${total.toFixed(2)}`;
-}
-function clearCart() {
-  setCart([]);
-  updateCartDisplay();
-}
-function updateCartCount() {
-  cartCount.textContent = getCart().length;
-  updateCartDisplay();
-}
-// --- Product data (sync with product cards) ---
-const products = [
-  { name: 'Amber Leaf 50g (UK)', price: 19.99, img: 'amberleafuk.jpg', desc: 'Classic British rolling tobacco. Smooth, fresh, rich aroma.' },
-  { name: 'Amber Leaf 50g (Belgium)', price: 16.99, img: 'amberleafbelgium.jpg', desc: 'Continental blend, mellow, unbeatable price.' },
-  { name: 'Rothmans Cigarettes', price: 12.99, img: 'rothmans.jpg', desc: 'Refined, full-bodied flavour. Premium quality.' },
-  { name: 'Golden Virginia 50g', price: 20.49, img: 'goldenvirginia.jpg', desc: 'Smooth, classic, and aromatic. A UK favourite.' },
-  { name: 'Silk Cut Cigarettes', price: 13.49, img: 'silkcut.jpg', desc: 'Light, smooth, and easy. For the discerning smoker.' },
-  { name: 'Benson & Hedges Gold', price: 14.99, img: 'bensongold.jpg', desc: 'Premium taste, iconic British brand.' },
-  { name: 'Marlboro Red', price: 15.99, img: 'marlborored.jpg', desc: 'Bold, rich, and world-renowned.' }
-];
-// --- Buy Now and Add to Cart buttons ---
-document.querySelectorAll('.product-card').forEach((card, i) => {
-  const buyBtn = card.querySelector('.buy-btn');
-  const addBtn = card.querySelector('.addcart-btn');
-  if (buyBtn) buyBtn.onclick = () => buyNow(i);
-  if (addBtn) addBtn.onclick = () => {
-    addToCart(products[i]);
-    updateCartCount();
-    alert('Added to cart!');
-  };
-});
-function buyNow(idx) {
-  const product = products[idx];
-  addToCart(product);
-  const cart = getCart();
-  if (!cart.length) return alert('Your cart is empty!');
-  logEvent('cart_checkout', cart);
-  checkoutNow(cart);
-}
-cartBtn.addEventListener('click', () => {
-  const cart = getCart();
-  if (!cart.length) return alert('Your cart is empty!');
-  logEvent('cart_checkout', cart);
-  checkoutNow(cart);
-});
-updateCartCount();
 
-// --- Logging ---
-function logEvent(type, data) {
-  const logs = JSON.parse(localStorage.getItem('eventlog') || '[]');
-  logs.push({ type, data, time: new Date().toISOString() });
-  localStorage.setItem('eventlog', JSON.stringify(logs));
-}
-    // --- Rainbow logo hover ---
+    // --- Cart logic ---
+    const cartBtn = document.getElementById('cart-btn');
+    const cartCount = document.getElementById('cart-count');
+    function getCart() {
+      return JSON.parse(localStorage.getItem('cart') || '[]');
+    }
+    function setCart(cart) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      let count = 0;
+      for (const item of cart) count += item.quantity || 1;
+      cartCount.textContent = count;
+      updateCartDisplay();
+    }
+    function addToCart(product) {
+      const cart = getCart();
+      const existingIndex = cart.findIndex(item => item.name === product.name);
+      if (existingIndex >= 0) {
+        cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+      } else {
+        product.quantity = 1;
+        cart.push(product);
+      }
+      setCart(cart);
+      logEvent('cart_add', product);
+    }
+    function removeFromCart(index) {
+      const cart = getCart();
+      cart.splice(index, 1);
+      setCart(cart);
+      logEvent('cart_remove', { index });
+    }
+    function updateQuantity(index, newQuantity) {
+      const cart = getCart();
+      if (newQuantity > 0) {
+        cart[index].quantity = newQuantity;
+        setCart(cart);
+        logEvent('cart_update', { index, quantity: newQuantity });
+      } else {
+        removeFromCart(index);
+      }
+    }
+    function saveForLater(index) {
+      const cart = getCart();
+      const product = cart[index];
+      const savedItems = JSON.parse(localStorage.getItem('savedItems') || '[]');
+      savedItems.push(product);
+      localStorage.setItem('savedItems', JSON.stringify(savedItems));
+      removeFromCart(index);
+      logEvent('cart_save_for_later', { product, index });
+    }
+    function updateCartDisplay() {
+      const cart = getCart();
+      const cartItems = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+      
+      if (!cartItems || !cartTotal) return;
+      
+      cartItems.innerHTML = cart.length ? cart.map((item, index) => `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <h3>${item.name}</h3>
+            <p>£${item.price.toFixed(2)} each</p>
+          </div>
+          <div class="cart-item-actions">
+            <div class="quantity-controls">
+              <button onclick="updateQuantity(${index}, ${(cart[index].quantity || 1) - 1})">-</button>
+              <span>${cart[index].quantity || 1}</span>
+              <button onclick="updateQuantity(${index}, ${(cart[index].quantity || 1) + 1})">+</button>
+            </div>
+            <div class="action-buttons">
+              <button onclick="saveForLater(${index})" class="save-btn">Save for Later</button>
+              <button onclick="removeFromCart(${index})" class="remove-btn">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('') : '<p>Your cart is empty</p>';
+      
+      const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+      cartTotal.textContent = `£${total.toFixed(2)}`;
+    }
+    function updateCartCount() {
+      let count = 0;
+      const cart = getCart();
+      for (const item of cart) count += item.quantity || 1;
+      cartCount.textContent = count;
+      updateCartDisplay();
+    }
+
+    // --- Product data ---
+    const products = [
+      { name: 'Amber Leaf 50g (UK)', price: 19.99 },
+      { name: 'Amber Leaf 50g (Belgium)', price: 16.99 },
+      { name: 'Rothmans Cigarettes', price: 12.99 },
+      { name: 'Golden Virginia 50g', price: 20.49 },
+      { name: 'Silk Cut Cigarettes', price: 13.49 },
+      { name: 'Benson & Hedges Gold', price: 14.99 },
+      { name: 'Marlboro Red', price: 15.99 }
+    ];
+
+    function buyNow(idx) {
+      const product = products[idx];
+      addToCart(product);
+      const cart = getCart();
+      if (!cart.length) return alert('Your cart is empty!');
+      logEvent('cart_checkout', cart);
+      checkoutNow(cart);
+    }
+
+    cartBtn.addEventListener('click', () => {
+      showSection('cart');
+      updateCartDisplay();
+    });
+
+    function proceedToCheckout() {
+      const cart = getCart();
+      if (!cart.length) return alert('Your cart is empty!');
+      logEvent('cart_checkout', cart);
+      checkoutNow(cart);
+    }
+
+    // Initialize cart
+    updateCartCount();
+    updateCartDisplay();
+
+    // --- Logging ---
+    function logEvent(type, data) {
+      const logs = JSON.parse(localStorage.getItem('eventlog') || '[]');
+      logs.push({ type, data, time: new Date().toISOString() });
+      localStorage.setItem('eventlog', JSON.stringify(logs));
+    }
+
+    // --- Logo click functionality ---
     const logo = document.getElementById('site-logo');
     if (logo) {
-      logo.addEventListener('mouseenter',()=>logo.classList.add('rainbow'));
-      logo.addEventListener('mouseleave',()=>logo.classList.remove('rainbow'));
-      // Optional: click logo to go to Why So Cheap
       logo.addEventListener('click',()=>showSection('whysocheap'));
     }
-    // --- Checkout function ---
-    // --- Stripe Integration ---
-    // 1. Add your Stripe publishable key below where it says 'YOUR_STRIPE_PUBLISHABLE_KEY'.
-    // 2. You must also set up a backend endpoint to create Stripe Checkout Sessions (see below for details).
-    // 3. See comments for what to replace and where.
 
-    // Load Stripe.js
+    // --- Stripe Integration ---
     if (!window.Stripe) {
       const stripeScript = document.createElement('script');
       stripeScript.src = 'https://js.stripe.com/v3/';
@@ -657,19 +1182,12 @@ function logEvent(type, data) {
         paymentForm.innerHTML = `
           <h2>Payment Information</h2>
           <p>Total: £${cartTotal.toFixed(2)}</p>
-          <button id="stripe-checkout-btn" class="gold-btn" style="font-size:1.2rem;">Pay with Card (Stripe)</button>
-          <div style="margin-top:16px;font-size:0.95em;color:#FFD600;">You will be redirected to a secure Stripe checkout page.</div>
+          <button id="stripe-checkout-btn" class="gold-btn large-btn">Pay with Card (Stripe)</button>
+          <div class="stripe-note">You will be redirected to a secure Stripe checkout page.</div>
         `;
-        // Stripe Checkout button handler
         document.getElementById('stripe-checkout-btn').onclick = async function() {
-          // 1. Replace with your Stripe publishable key:
-          // Use your Stripe TEST publishable key for testing
-          const stripe = Stripe('pk_live_51Rg3n2FphX9gu7mJKsh3Q4yoA4PyLZXcs4kuUs4KJueDstyGIMZcmGHmuaWXrVzrs9fBRVByOfAEYpjeFbrlDkzI00weWvGWBt'); // <-- REPLACE THIS
-
-          // 2. Send cart data to your backend to create a Checkout Session
-          //    Replace the URL below with your backend endpoint that creates a Stripe Checkout Session
-          //    (see https://stripe.com/docs/payments/checkout/accept-a-payment#create-checkout-session)
-          const response = await fetch('http://localhost:4242/create-checkout-session', { // <-- REPLACE THIS
+          const stripe = Stripe('pk_live_51Rg3n2FphX9gu7mJKsh3Q4yoA4PyLZXcs4kuUs4KJueDstyGIMZcmGHmuaWXrVzrs9fBRVByOfAEYpjeFbrlDkzI00weWvGWBt');
+          const response = await fetch('https://britishbaccy.onrender.com/create-checkout-session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -685,7 +1203,6 @@ function logEvent(type, data) {
             alert('Payment error: could not create Stripe session.');
             return;
           }
-          // 3. Redirect to Stripe Checkout
           const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
           if (error) {
             alert(error.message);
@@ -693,6 +1210,864 @@ function logEvent(type, data) {
         };
       }
     }
+
+    // --- Initialize WebGL Shader Background ---
+    class Stage {
+      constructor() {
+        this.renderParam = {
+          clearColor: 0x666666,
+          width: window.innerWidth,
+          height: window.innerHeight
+        };
+
+        this.cameraParam = {
+          left: -1,
+          right: 1,
+          top: 1,
+          bottom: 1,
+          near: 0,
+          far: -1
+        };
+
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.geometry = null;
+        this.material = null;
+        this.mesh = null;
+
+        this.isInitialized = false;
+      }
+
+      init() {
+        this._setScene();
+        this._setRender();
+        this._setCamera();
+
+        this.isInitialized = true;
+      }
+
+      _setScene() {
+        this.scene = new THREE.Scene();
+      }
+
+      _setRender() {
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: document.getElementById("webgl-canvas")
+        });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setClearColor(new THREE.Color(this.renderParam.clearColor));
+        this.renderer.setSize(this.renderParam.width, this.renderParam.height);
+      }
+
+      _setCamera() {
+        if (!this.isInitialized) {
+          this.camera = new THREE.OrthographicCamera(
+            this.cameraParam.left,
+            this.cameraParam.right,
+            this.cameraParam.top,
+            this.cameraParam.bottom,
+            this.cameraParam.near,
+            this.cameraParam.far
+          );
+        }
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        this.camera.aspect = windowWidth / windowHeight;
+
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(windowWidth, windowHeight);
+      }
+
+      _render() {
+        this.renderer.render(this.scene, this.camera);
+      }
+
+      onResize() {
+        this._setCamera();
+      }
+
+      onRaf() {
+        this._render();
+      }
+    }
+
+    class Mesh {
+      constructor(stage) {
+        this.canvas = document.getElementById("webgl-canvas");
+        this.canvasWidth = this.canvas.width;
+        this.canvasHeight = this.canvas.height;
+
+        this.uniforms = {
+          resolution: { type: "v2", value: [this.canvasWidth, this.canvasHeight] },
+          time: { type: "f", value: 0.0 },
+          xScale: { type: "f", value: 1.0 },
+          yScale: { type: "f", value: 0.5 },
+          distortion: { type: "f", value: 0.05 }
+        };
+
+        this.stage = stage;
+
+        this.mesh = null;
+
+        this.xScale = 1.0;
+        this.yScale = 0.5;
+        this.distortion = 0.05;
+      }
+
+      init() {
+        this._setMesh();
+      }
+
+      _setMesh() {
+        const position = [
+          -1.0, -1.0, 0.0,
+          1.0, -1.0, 0.0,
+          -1.0, 1.0, 0.0,
+          1.0, -1.0, 0.0,
+          -1.0, 1.0, 0.0,
+          1.0, 1.0, 0.0
+        ];
+
+        const positions = new THREE.BufferAttribute(new Float32Array(position), 3);
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", positions);
+
+        const vertexShader = `
+          attribute vec3 position;
+          void main() {
+            gl_Position = vec4(position, 1.0);
+          }
+        `;
+
+        const fragmentShader = `
+          precision highp float;
+          uniform vec2 resolution;
+          uniform float time;
+          uniform float xScale;
+          uniform float yScale;
+          uniform float distortion;
+
+          void main() {
+            vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / min(resolution.x, resolution.y);
+            
+            float d = length(p) * distortion;
+            
+            float rx = p.x * (1.0 + d);
+            float gx = p.x;
+            float bx = p.x * (1.0 - d);
+
+            float r = 0.05 / abs(p.y + sin((rx + time) * xScale) * yScale);
+            float g = 0.05 / abs(p.y + sin((gx + time) * xScale) * yScale);
+            float b = 0.05 / abs(p.y + sin((bx + time) * xScale) * yScale);
+            
+            gl_FragColor = vec4(r, g, b, 1.0);
+          }
+        `;
+
+        const material = new THREE.RawShaderMaterial({
+          vertexShader: vertexShader,
+          fragmentShader: fragmentShader,
+          uniforms: this.uniforms,
+          side: THREE.DoubleSide
+        });
+
+        this.mesh = new THREE.Mesh(geometry, material);
+
+        this.stage.scene.add(this.mesh);
+      }
+
+      _render() {
+        this.uniforms.time.value += 0.01;
+      }
+
+      onRaf() {
+        this._render();
+      }
+    }
+
+    // Initialize WebGL Background
+    (() => {
+      const stage = new Stage();
+      stage.init();
+
+      const mesh = new Mesh(stage);
+      mesh.init();
+
+      window.addEventListener("resize", () => {
+        stage.onResize();
+      });
+
+      const _raf = () => {
+        window.requestAnimationFrame(() => {
+          stage.onRaf();
+          mesh.onRaf();
+          _raf();
+        });
+      };
+
+      _raf();
+    })();
+
+    // ============================================================================
+    // FIREBASE INITIALIZATION
+    // ============================================================================
+    
+    // Initialize Firebase with your configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAd35sKZRjGZKMlJLa-u4xQaMqaBE1pInA",
+      authDomain: "britishbaccy.firebaseapp.com",
+      projectId: "britishbaccy",
+      storageBucket: "britishbaccy.appspot.com",
+      messagingSenderId: "181626144864",
+      appId: "1:181626144864:web:40e72832b1617518abdb05"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    console.log('🔥 Firebase initialized successfully!');
+    console.log('📊 Project ID:', firebaseConfig.projectId);
+    console.log('🔑 API Key configured');
+
+    // ============================================================================
+    // AUTHENTICATION SYSTEM - FIREBASE INTEGRATED
+    // ============================================================================
+    
+    // REPLACE THIS WITH YOUR ACTUAL BACKEND URL
+    const API_BASE_URL = 'http://localhost:3000'; // Change to your deployed backend URL
+    
+    // Authentication state management
+    let currentUser = null;
+    let authToken = localStorage.getItem('authToken');
+    
+    // Initialize authentication state on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeAuth();
+      setupFormHandlers();
+      updateUIForAuthState();
+    });
+    
+    // ============================================================================
+    // AUTHENTICATION FUNCTIONS
+    // ============================================================================
+    
+    async function initializeAuth() {
+      if (authToken) {
+        try {
+          // REPLACE: Verify token with your backend
+          const response = await fetch(`${API_BASE_URL}/api/profile`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user;
+            updateUIForAuthState();
+          } else {
+            // Token is invalid, clear it
+            logout();
+          }
+        } catch (error) {
+          console.error('Auth initialization error:', error);
+          // If backend is not available, continue without authentication
+          // REMOVE THIS COMMENT WHEN BACKEND IS READY
+        }
+      }
+    }
+    
+    function updateUIForAuthState() {
+      const body = document.body;
+      const nav = document.querySelector('nav');
+      
+      if (currentUser) {
+        body.classList.add('user-logged-in');
+        body.classList.remove('user-logged-out');
+        
+        // Add profile button to navigation if not exists
+        if (!document.querySelector('[data-section="profile"]')) {
+          const profileBtn = document.createElement('a');
+          profileBtn.href = '#profile';
+          profileBtn.className = 'nav-btn';
+          profileBtn.setAttribute('data-section', 'profile');
+          profileBtn.textContent = 'Profile';
+          profileBtn.addEventListener('click', e => {
+            e.preventDefault();
+            showSection('profile');
+            loadProfile();
+          });
+          nav.insertBefore(profileBtn, nav.lastElementChild);
+        }
+        
+        // Update profile section if visible
+        if (document.getElementById('profile').classList.contains('active')) {
+          loadProfile();
+        }
+      } else {
+        body.classList.add('user-logged-out');
+        body.classList.remove('user-logged-in');
+        
+        // Remove profile button if exists
+        const profileBtn = document.querySelector('[data-section="profile"]');
+        if (profileBtn) {
+          profileBtn.remove();
+        }
+      }
+    }
+    
+    // ============================================================================
+    // FORM HANDLERS
+    // ============================================================================
+    
+    function setupFormHandlers() {
+      // Registration form
+      const registerForm = document.getElementById('register-form');
+      if (registerForm) {
+        registerForm.addEventListener('submit', handleRegistration);
+      }
+      
+      // Login form
+      const loginForm = document.getElementById('login-form');
+      if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+      }
+      
+      // Forgot password form
+      const forgotForm = document.getElementById('forgot-form');
+      if (forgotForm) {
+        forgotForm.addEventListener('submit', handleForgotPassword);
+      }
+      
+      // Profile form
+      const profileForm = document.getElementById('profile-form');
+      if (profileForm) {
+        profileForm.addEventListener('submit', handleProfileUpdate);
+      }
+      
+      // Logout button
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+    }
+    
+    // ============================================================================
+    // REGISTRATION HANDLER
+    // ============================================================================
+    
+    async function handleRegistration(e) {
+      e.preventDefault();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      // Clear previous errors
+      clearFormErrors('register');
+      
+      // Client-side validation
+      const errors = validateRegistrationData(data);
+      if (Object.keys(errors).length > 0) {
+        displayFormErrors('register', errors);
+        return;
+      }
+      
+      // Show loading state
+      toggleFormLoading('register', true);
+      
+      try {
+        // REPLACE: Send registration request to your backend
+        const response = await fetch(`${API_BASE_URL}/api/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Registration successful
+          showFormSuccess('register', result.message || 'Registration successful! Please check your email to verify your account.');
+          form.reset();
+          
+          // Redirect to success page after 2 seconds
+          setTimeout(() => {
+            window.location.href = `success.html?email=${encodeURIComponent(data.email)}`;
+          }, 2000);
+          
+        } else {
+          // Registration failed
+          showFormError('register', result.error || 'Registration failed. Please try again.');
+        }
+        
+      } catch (error) {
+        console.error('Registration error:', error);
+        showFormError('register', 'Network error. Please check your connection and try again.');
+        
+        // REMOVE THIS WHEN BACKEND IS READY - Demo mode
+        showFormSuccess('register', 'Demo Mode: Registration would be successful! (Backend not connected)');
+        form.reset();
+      } finally {
+        toggleFormLoading('register', false);
+      }
+    }
+    
+    // ============================================================================
+    // LOGIN HANDLER
+    // ============================================================================
+    
+    async function handleLogin(e) {
+      e.preventDefault();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      // Clear previous errors
+      clearFormErrors('login');
+      
+      // Client-side validation
+      if (!data.email || !data.password) {
+        showFormError('login', 'Please fill in all fields.');
+        return;
+      }
+      
+      // Show loading state
+      toggleFormLoading('login', true);
+      
+      try {
+        // REPLACE: Send login request to your backend
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          // Login successful
+          authToken = result.token;
+          currentUser = result.user;
+          
+          // Store token
+          localStorage.setItem('authToken', authToken);
+          
+          // Store remember me preference
+          if (data.rememberMe) {
+            localStorage.setItem('rememberMe', 'true');
+          }
+          
+          showFormSuccess('login', 'Login successful! Redirecting...');
+          updateUIForAuthState();
+          
+          // Redirect to profile or products page
+          setTimeout(() => {
+            showSection('profile');
+            loadProfile();
+          }, 1000);
+          
+        } else {
+          // Login failed
+          showFormError('login', result.error || 'Invalid email or password.');
+        }
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        showFormError('login', 'Network error. Please check your connection and try again.');
+        
+        // REMOVE THIS WHEN BACKEND IS READY - Demo mode
+        showFormSuccess('login', 'Demo Mode: Login would be successful! (Backend not connected)');
+        currentUser = { id: 'demo', email: data.email, nickname: 'Demo User', isVerified: true };
+        updateUIForAuthState();
+        setTimeout(() => {
+          showSection('profile');
+          loadProfile();
+        }, 1000);
+      } finally {
+        toggleFormLoading('login', false);
+      }
+    }
+    
+    // ============================================================================
+    // FORGOT PASSWORD HANDLER
+    // ============================================================================
+    
+    async function handleForgotPassword(e) {
+      e.preventDefault();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      // Clear previous errors
+      clearFormErrors('forgot');
+      
+      if (!data.email) {
+        showFormError('forgot', 'Please enter your email address.');
+        return;
+      }
+      
+      // Show loading state
+      toggleFormLoading('forgot', true);
+      
+      try {
+        // REPLACE: Send forgot password request to your backend
+        const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          showFormSuccess('forgot', result.message || 'If an account with that email exists, a reset link has been sent.');
+          form.reset();
+        } else {
+          showFormError('forgot', result.error || 'Failed to send reset email.');
+        }
+        
+      } catch (error) {
+        console.error('Forgot password error:', error);
+        showFormError('forgot', 'Network error. Please try again.');
+        
+        // REMOVE THIS WHEN BACKEND IS READY - Demo mode
+        showFormSuccess('forgot', 'Demo Mode: Password reset email would be sent! (Backend not connected)');
+        form.reset();
+      } finally {
+        toggleFormLoading('forgot', false);
+      }
+    }
+    
+    // ============================================================================
+    // PROFILE FUNCTIONS
+    // ============================================================================
+    
+    async function loadProfile() {
+      if (!currentUser) {
+        showSection('login');
+        return;
+      }
+      
+      const profileLoading = document.getElementById('profile-loading');
+      const profileData = document.getElementById('profile-data');
+      
+      profileLoading.style.display = 'block';
+      profileData.style.display = 'none';
+      
+      try {
+        // REPLACE: Fetch profile data from your backend
+        if (authToken) {
+          const response = await fetch(`${API_BASE_URL}/api/profile`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            currentUser = result.user;
+          }
+        }
+        
+        // Update profile UI
+        updateProfileUI();
+        
+      } catch (error) {
+        console.error('Profile load error:', error);
+        // Continue with cached user data
+        updateProfileUI();
+      } finally {
+        profileLoading.style.display = 'none';
+        profileData.style.display = 'block';
+      }
+    }
+    
+    function updateProfileUI() {
+      if (!currentUser) return;
+      
+      // Update avatar
+      const avatarText = document.getElementById('profile-avatar-text');
+      if (avatarText) {
+        avatarText.textContent = currentUser.nickname ? currentUser.nickname.charAt(0).toUpperCase() : 'U';
+      }
+      
+      // Update profile info
+      const nicknameEl = document.getElementById('profile-nickname');
+      const emailEl = document.getElementById('profile-email');
+      const statusEl = document.getElementById('profile-status');
+      
+      if (nicknameEl) nicknameEl.textContent = currentUser.nickname || 'User';
+      if (emailEl) emailEl.textContent = currentUser.email || '';
+      if (statusEl) {
+        statusEl.textContent = currentUser.isVerified ? 'Verified' : 'Unverified';
+        statusEl.className = `profile-status ${currentUser.isVerified ? 'verified' : 'unverified'}`;
+      }
+      
+      // Update form input
+      const nicknameInput = document.getElementById('profile-nickname-input');
+      if (nicknameInput) {
+        nicknameInput.value = currentUser.nickname || '';
+      }
+      
+      // Update stats
+      const totalOrdersEl = document.getElementById('total-orders');
+      const memberSinceEl = document.getElementById('member-since');
+      
+      if (totalOrdersEl) totalOrdersEl.textContent = currentUser.orders?.length || 0;
+      if (memberSinceEl && currentUser.createdAt) {
+        const date = new Date(currentUser.createdAt);
+        memberSinceEl.textContent = date.getFullYear();
+      }
+    }
+    
+    async function handleProfileUpdate(e) {
+      e.preventDefault();
+      
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      if (!data.nickname) {
+        alert('Nickname is required.');
+        return;
+      }
+      
+      try {
+        // REPLACE: Send profile update to your backend
+        const response = await fetch(`${API_BASE_URL}/api/profile`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          currentUser = result.user;
+          updateProfileUI();
+          alert('Profile updated successfully!');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to update profile.');
+        }
+        
+      } catch (error) {
+        console.error('Profile update error:', error);
+        alert('Network error. Please try again.');
+        
+        // REMOVE THIS WHEN BACKEND IS READY - Demo mode
+        currentUser.nickname = data.nickname;
+        updateProfileUI();
+        alert('Demo Mode: Profile would be updated! (Backend not connected)');
+      }
+    }
+    
+    // ============================================================================
+    // LOGOUT FUNCTION
+    // ============================================================================
+    
+    async function logout() {
+      try {
+        // REPLACE: Send logout request to your backend
+        if (authToken) {
+          await fetch(`${API_BASE_URL}/api/logout`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        // Clear local state
+        authToken = null;
+        currentUser = null;
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('rememberMe');
+        
+        updateUIForAuthState();
+        showSection('products');
+        
+        // Show logout message
+        setTimeout(() => {
+          alert('You have been logged out successfully.');
+        }, 500);
+      }
+    }
+    
+    // ============================================================================
+    // UTILITY FUNCTIONS
+    // ============================================================================
+    
+    function validateRegistrationData(data) {
+      const errors = {};
+      
+      if (!data.email) {
+        errors.email = 'Email is required';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        errors.email = 'Invalid email format';
+      }
+      
+      if (!data.password) {
+        errors.password = 'Password is required';
+      } else if (data.password.length < 6) {
+        errors.password = 'Password must be at least 6 characters';
+      }
+      
+      if (!data.confirmPassword) {
+        errors.confirmPassword = 'Please confirm your password';
+      } else if (data.password !== data.confirmPassword) {
+        errors.confirmPassword = 'Passwords do not match';
+      }
+      
+      if (!data.nickname) {
+        errors.nickname = 'Nickname is required';
+      }
+      
+      return errors;
+    }
+    
+    function clearFormErrors(formType) {
+      const errorDiv = document.getElementById(`${formType}-error`);
+      const successDiv = document.getElementById(`${formType}-success`);
+      
+      if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+      }
+      
+      if (successDiv) {
+        successDiv.style.display = 'none';
+        successDiv.textContent = '';
+      }
+      
+      // Clear field errors
+      const fieldErrors = document.querySelectorAll(`#${formType}-form .field-error`);
+      fieldErrors.forEach(error => {
+        error.textContent = '';
+      });
+    }
+    
+    function displayFormErrors(formType, errors) {
+      Object.keys(errors).forEach(field => {
+        const errorEl = document.getElementById(`${field}-error`);
+        if (errorEl) {
+          errorEl.textContent = errors[field];
+        }
+      });
+    }
+    
+    function showFormError(formType, message) {
+      const errorDiv = document.getElementById(`${formType}-error`);
+      if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+      }
+    }
+    
+    function showFormSuccess(formType, message) {
+      const successDiv = document.getElementById(`${formType}-success`);
+      if (successDiv) {
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+      }
+    }
+    
+    function toggleFormLoading(formType, isLoading) {
+      const btn = document.getElementById(`${formType}-btn`);
+      if (btn) {
+        const textSpan = btn.querySelector('.btn-text');
+        const loadingSpan = btn.querySelector('.btn-loading');
+        
+        if (textSpan && loadingSpan) {
+          if (isLoading) {
+            textSpan.style.display = 'none';
+            loadingSpan.style.display = 'inline';
+            btn.disabled = true;
+          } else {
+            textSpan.style.display = 'inline';
+            loadingSpan.style.display = 'none';
+            btn.disabled = false;
+          }
+        }
+      }
+    }
+    
+    // ============================================================================
+    // SETUP INSTRUCTIONS FOR BACKEND INTEGRATION
+    // ============================================================================
+    
+    /*
+    BACKEND INTEGRATION INSTRUCTIONS:
+    
+    1. UPDATE API_BASE_URL:
+       - Change API_BASE_URL to your deployed backend URL
+       - For local development: 'http://localhost:3000'
+       - For production: 'https://your-domain.com'
+    
+    2. START YOUR BACKEND SERVER:
+       - Run: npm install
+       - Run: npm start
+       - Server should be running on the port specified in server.js
+    
+    3. DATABASE SETUP:
+       - Choose between Firebase or MongoDB (see server.js comments)
+       - Uncomment the relevant database code in server.js
+       - Add your database connection details
+    
+    4. EMAIL SERVICE SETUP:
+       - Choose between SendGrid or Nodemailer (see server.js comments)
+       - Uncomment the relevant email service code
+       - Add your email service credentials
+    
+    5. ENVIRONMENT VARIABLES:
+       - Create a .env file in your backend directory
+       - Add the following variables:
+         JWT_SECRET=your_secure_random_string_here
+         MONGODB_URI=your_mongodb_connection_string (if using MongoDB)
+         SENDGRID_API_KEY=your_sendgrid_key (if using SendGrid)
+         STRIPE_SECRET_KEY=your_stripe_secret_key
+         FRONTEND_URL=your_frontend_url
+    
+    6. REMOVE DEMO MODE:
+       - Remove all "REMOVE THIS WHEN BACKEND IS READY" comments and code
+       - Remove the demo mode fallbacks in catch blocks
+    
+    7. TEST THE SYSTEM:
+       - Try registering a new account
+       - Check if email verification works (if enabled)
+       - Test login functionality
+       - Test profile updates
+       - Test password reset
+    
+    8. SECURITY CONSIDERATIONS:
+       - Use HTTPS in production
+       - Set secure JWT secret
+       - Configure CORS properly
+       - Enable rate limiting
+       - Validate all inputs on backend
+    */
   </script>
 </body>
 </html>
